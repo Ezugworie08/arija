@@ -1,8 +1,22 @@
 const express = require('express');
+const { v4 : uuid4 } = require('uuid');
 
-function createActions ({ db }) {
-    function recordViewing (traceId, videoId) {
-
+function createActions ({ messageStore }) {
+    function recordViewing (traceId, videoId, userId) {
+        const viewedEvent = {
+            id: uuid4(),
+            type: 'VideoViewed',
+            metadata: {
+                traceId,
+                userId
+            },
+            data: {
+                userId,
+                videoId
+            }
+        };
+        const streamName = `viewing-${videoId}`;
+        return messageStore.write(streamName, viewedEvent);
     }
 
     return {
@@ -13,7 +27,7 @@ function createActions ({ db }) {
 function createHandlers ({ actions }) {
     function handleRecordViewing (req, res, next) {
         return actions
-            .recordViewing(req.context.traceId, req.params.videoId)
+            .recordViewing(req.context.traceId, req.params.videoId, req.params.userId)
             .then(() => res.redirect('/'))
             .catch(next);
     }
@@ -23,8 +37,8 @@ function createHandlers ({ actions }) {
     };
 }
 
-function createRecordViewings ({ db }) {
-    const actions = createActions({ db });
+function createRecordViewings ({ messageStore }) {
+    const actions = createActions({ messageStore });
     const handlers = createHandlers({ actions });
 
     const router = express.Router();

@@ -5,9 +5,18 @@ services:
     image: postgres:10.3
     environment:
       - POSTGRES_DB=arija
+      - POSTGRES_PASSWORD=dimeje
     ports:
       - '0.0.0.0:5432:5432'
   message-db:
     image: ethangarofolo/message-db:1.1.6
     ports:
       - '0.0.0.0:5433:5432'
+  pgadmin:
+    image: dpage/pgadmin4
+#    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - '0.0.0.0:5050:80'
